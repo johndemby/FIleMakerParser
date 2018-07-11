@@ -50,9 +50,8 @@ class Parser
     {
         val retval : MutableList<OpCode> = LinkedList()
         val lexer : Lexer = Lexer(input)
-
         var lexeme : Lexeme = lexer.next()
-
+        val initKeywords = "DEFINE, TYPE, WRITE, HEADER, COPY"
 
         while (lexeme.lexType != LexType.LexEOT)
         {
@@ -60,23 +59,38 @@ class Parser
             {
                 LexType.LexName ->
                 {
-                    retval.add(
+                    retval.addAll(
                             when (lexeme.stringVal.toUpperCase())
                             {
-                                "DEFINE" -> processDefine(lexer)
-                                "TYPE" -> processTypeRef(lexer)
+                                "DEFINE" -> listOf(processDefine(lexer))
+                                "TYPE"   -> listOf(processTypeRef(lexer))
+                                "WRITE"  -> listOf(OpWrite())
+                                "HEADER" -> listOf(OpHeader())
+                                "COPY"   -> listOf(processCopy(lexer))
+                                //"RECORD" -> OpRecord()
 
-                                else -> throw BadDataException("*** ERROR expected \"DEFINE\" but got ${lexeme.stringVal}")
+                                else -> throw BadDataException("*** ERROR expected one of $initKeywords but got ${lexeme.stringVal}")
                             }
                     )
                 }
-
-                else -> throw BadDataException("Invalid token, expected keyword \"DEFINE\" but got $lexeme")
+                else -> throw BadDataException("Invalid token, expected  a NAME  got $lexeme")
             }
             lexeme = lexer.next()
         }
         return retval
     }
+
+
+    fun processCopy(lexer : Lexer) : OpCode
+    {
+        val lex = lexer.next()
+
+        if (lex.lexType != LexType.LexName)
+            BadDataException(" COPY - expected name got $lex ")
+
+        return OpCopy(lex.stringVal)
+    }
+
 
     fun processDefine(lexer : Lexer) : OpCode
     {

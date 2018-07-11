@@ -1,5 +1,7 @@
 package jd
 
+import java.util.logging.XMLFormatter
+
 
 typealias StringList = List<String>
 
@@ -19,21 +21,11 @@ data class OpTypeRef(val name : String) : OpCode()
 
 data class OpRecord (val name : String , val fields : StringList)  : OpCode()
 
+data class OpWrite(val foo : Byte = 0) : OpCode()
+data class OpHeader(val foo : Byte = 0) : OpCode()
+data class OpCopy(val name : String) : OpCode()
+data class OpSet(val name :String , val x : String) : OpCode()
 
-
-class tryIt
-{
-
-
-    fun doSomething(): OpCode
-    {
-
-        val op: OpCode = OpTypeDef("ralph", listOf("A", ":B", "Q"))
-
-        return op
-
-    }
-}
 
 
 

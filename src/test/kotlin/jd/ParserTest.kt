@@ -61,5 +61,59 @@ class ParserTest
 
     }
 
+    @Test
+    @DisplayName("TypeDef - good")
+    fun testGoodTypeDef()
+    {
+        val dataStr = "define TYPE goodType (col1 col2 col3)"
+        val expected : List<OpCode> = listOf(OpTypeDef("goodType", listOf("col1", "col2", "col3")))
+        val parser = Parser()
+        val opcodes = parser.parseIt(StringReader(dataStr))
+        assertEquals(expected, opcodes)
+    }
 
+
+
+    @Test
+    fun testWrite()
+    {
+        val dataStr = "write  "
+        val expected : List<OpCode> = listOf(OpWrite())
+        val parser = Parser()
+        val opcodes = parser.parseIt(StringReader(dataStr))
+        assertEquals(expected, opcodes)
+    }
+
+
+    @Test
+    fun testHeader()
+    {
+        val dataStr = "heaDer  "
+        val expected : List<OpCode> = listOf(OpHeader())
+        val parser = Parser()
+        val opcodes = parser.parseIt(StringReader(dataStr))
+        assertEquals(expected, opcodes)
+    }
+
+
+    @Test
+    @DisplayName("valid type reference")
+    fun testTypeRef()
+    {
+        val dataStr = "type sometype "
+        val expected: List<OpCode> = listOf(OpTypeRef("sometype"))
+        val parser = Parser()
+        val opcodes = parser.parseIt(StringReader(dataStr))
+        assertEquals(expected, opcodes)
+    }
+
+    @Test
+    @DisplayName("bad type reference no name")
+    fun testTypeRefNoName()
+    {
+        val dataStr = "type  define type q( a b c) "
+        val parser = Parser()
+     //   assertFailsWith (BadDataException::class)
+       parser.parseIt(StringReader(dataStr))
+    }
 }
