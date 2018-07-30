@@ -1,8 +1,5 @@
 package jd
 
-import java.util.logging.XMLFormatter
-
-
 typealias StringList = List<String>
 
 sealed class OpCode

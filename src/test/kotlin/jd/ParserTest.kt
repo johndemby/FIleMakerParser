@@ -1,18 +1,18 @@
 package jd
 
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Assertions.assertThrows
 import java.io.StringReader
-import kotlin.test.Test
-import kotlin.test.assertFailsWith
 
 
 class ParserTest
 {
 
     @Test
-    @DisplayName("Type definition test")
-    fun testTypeDef()
+    @DisplayName("Type (UC) definition test")
+    fun testTypeDefUC()
     {
         val dataStr = " define TYPE mytype ( fldA fldB )"
 
@@ -25,6 +25,22 @@ class ParserTest
     }
 
     @Test
+    @DisplayName("Type definition lowercase")
+    fun testTypeDefLC()
+    {
+        val dataStr = " define type mytype ( fldA fldB )"
+
+        val  parser = Parser()
+
+        val actual : List<OpCode> = parser.parseIt(StringReader(dataStr))
+        val expected = listOf(OpTypeDef("mytype", listOf("fldA", "fldB")))
+
+        assertEquals(expected, actual)
+    }
+
+
+
+    @Test
     @DisplayName("TypeDef missing name")
     fun testBadTypeDef()
     {
@@ -33,7 +49,7 @@ class ParserTest
 
         val  parser = Parser()
 
-        assertFailsWith(BadDataException::class) {parser.parseIt(StringReader(dataStr))}
+        assertThrows(BadDataException::class.java) {parser.parseIt(StringReader(dataStr))}
 
     }
 
@@ -44,7 +60,7 @@ class ParserTest
         // missing parens on field list
         val dataStr = " define TYPE thetype fldA fldB "
         val  parser = Parser()
-        assertFailsWith(BadDataException::class) {parser.parseIt(StringReader(dataStr))}
+        assertThrows(BadDataException::class.java) {parser.parseIt(StringReader(dataStr))}
 
     }
 
@@ -57,7 +73,7 @@ class ParserTest
 
         val  parser = Parser()
 
-        assertFailsWith(BadDataException::class) {parser.parseIt(StringReader(dataStr))}
+        assertThrows(BadDataException::class.java) {parser.parseIt(StringReader(dataStr))}
 
     }
 
@@ -111,9 +127,29 @@ class ParserTest
     @DisplayName("bad type reference no name")
     fun testTypeRefNoName()
     {
-        val dataStr = "type  define type q( a b c) "
+        val dataStr = "type ( a b c) "
         val parser = Parser()
-     //   assertFailsWith (BadDataException::class)
-       parser.parseIt(StringReader(dataStr))
+        assertThrows(BadDataException::class.java) {
+            parser.parseIt(StringReader(dataStr))
+        }
+    }
+
+
+
+
+    @Test
+    @DisplayName("Just for fun")
+    fun justForFun()
+    {
+        val dataStr = """
+            define TYPE mytype (col1 col2 col3)
+            define TYPE mytype2 (col4 col5 col6)
+            type mytype
+            write
+            """
+        println("fun says :")
+        Parser().parseIt(StringReader(dataStr)).forEach {println("  $it")}
+        assert(true)
+
     }
 }

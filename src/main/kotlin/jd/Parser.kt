@@ -1,7 +1,12 @@
 package jd
 
+import jd.lex.LexEOT
+import jd.lex.LexName
+import java.io.LineNumberReader
 import java.io.Reader
 import java.util.*
+import jd.lex.Lexer
+import jd.lex.Lexeme
 
 
 class BadDataException (msg : String) : Exception(msg)
@@ -46,21 +51,23 @@ write
 class Parser
 {
 
-    fun parseIt(input : Reader) : List<OpCode>
+
+    fun parseIt(rdr : Reader) : List<OpCode>
     {
+
         val retval : MutableList<OpCode> = LinkedList()
-        val lexer : Lexer = Lexer(input)
+        val lexer : Lexer = Lexer(rdr)
         var lexeme : Lexeme = lexer.next()
         val initKeywords = "DEFINE, TYPE, WRITE, HEADER, COPY"
 
-        while (lexeme.lexType != LexType.LexEOT)
+        while (lexeme !is LexEOT)
         {
-            when (lexeme.lexType)
+            when (lexeme)
             {
-                LexType.LexName ->
+                is LexName ->
                 {
                     retval.addAll(
-                            when (lexeme.stringVal.toUpperCase())
+                            when (lexeme.stringVal().toUpperCase())
                             {
                                 "DEFINE" -> listOf(processDefine(lexer))
                                 "TYPE"   -> listOf(processTypeRef(lexer))
@@ -69,11 +76,11 @@ class Parser
                                 "COPY"   -> listOf(processCopy(lexer))
                                 //"RECORD" -> OpRecord()
 
-                                else -> throw BadDataException("*** ERROR expected one of $initKeywords but got ${lexeme.stringVal}")
+                                else -> error(lexeme.lineNum, "*** ERROR expected one of $initKeywords but got ${lexeme.stringVal()}")
                             }
                     )
                 }
-                else -> throw BadDataException("Invalid token, expected  a NAME  got $lexeme")
+                else -> error(lexeme.lineNo, "Invalid token, expected  a NAME  got $lexeme")
             }
             lexeme = lexer.next()
         }
@@ -81,14 +88,19 @@ class Parser
     }
 
 
+    private fun error(lineNum : Int, msg : String) : Nothing
+    {
+        throw BadDataException("***Error on line $lineNum : $msg")
+    }
+
     fun processCopy(lexer : Lexer) : OpCode
     {
         val lex = lexer.next()
 
-        if (lex.lexType != LexType.LexName)
+        if (lex  !is jd.lex.LexName)
             BadDataException(" COPY - expected name got $lex ")
 
-        return OpCopy(lex.stringVal)
+        return OpCopy(lex.stringVal())
     }
 
 
@@ -96,10 +108,10 @@ class Parser
     {
         val lex = lexer.next()
 
-        return when (lex.stringVal)
+        return when (lex.stringVal().toUpperCase())
         {
             "TYPE" -> processTypeDef(lexer)
-            else -> throw BadDataException(" DEFINE - invalid word, expecting \"TYPE\" got $lex")
+            else -> error(lex.lineNo, " DEFINE - invalid word, expecting \"TYPE\" got $lex")
         }
 
     }
@@ -109,16 +121,16 @@ class Parser
     {
         var l1 : Lexeme = lexer.next()
 
-        if (l1.lexType != LexType.LexName)
+        if (l1 !is LexName)
         {
-            throw BadDataException(" TYPE - invalid name, expecting a ${LexType.LexName} got $l1")
+            error(l1.lineNo, "TYPE - invalid name, expecting a NAME got $l1")
         }
 
-        val typeName = l1.stringVal
+        val typeName = l1.stringVal()
         val fieldList : List<String>
 
         l1 = lexer.next()
-        if (l1.stringVal == "(")
+        if (l1.stringVal() == "(")
         {
             fieldList = processFieldList(lexer)
             return OpTypeDef(typeName, fieldList)
@@ -126,7 +138,7 @@ class Parser
         }
         else
         {
-            throw BadDataException("TypeDef expected Char '(', got $l1")
+            error(l1.lineNo, "TypeDef expected Char '(', got $l1")
         }
 
     }
@@ -136,13 +148,13 @@ class Parser
 
         var token = lexer.next()
         val retVal : MutableList<String> = LinkedList()
-        while (token.stringVal != ")" )
+        while (token.stringVal() != ")" )
         {
 
-            if (token.lexType == LexType.LexName)
+            if (token is LexName)
             {
 //                System.err.println("FLDLIST: ${token.stringVal}")
-                retVal.add(token.stringVal)
+                retVal.add(token.stringVal())
             }
             else
             {
@@ -160,10 +172,10 @@ class Parser
     fun processTypeRef(lexer : Lexer) : OpCode
     {
         val token = lexer.next()
-        if  (token.lexType != LexType.LexName)
-            throw BadDataException("Expecting a NAME , but got ${token}")
+        if  (token !is LexName)
+            error(token.lineNo, "Expecting a NAME , but got ${token}")
         else
-            return OpTypeRef(token.stringVal)
+            return OpTypeRef(token.stringVal())
 
     }
 
