@@ -18,15 +18,6 @@ class SymbolTable
         dict[name.toUpperCase()] = symbValue
     }
 
-/*
-
-    fun setString (name: String, value: String) {
-        dict[name.toUpperCase()] = value;
-    }
-
-    fun getString (name : String ) = dict[name.toUpperCase()] as String
-*/
-
     private val dict : HashMap<String, SymbolValue>  = HashMap()
 
     val size : Int
