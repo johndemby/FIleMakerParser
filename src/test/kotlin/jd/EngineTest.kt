@@ -100,7 +100,7 @@ class EngineTest {
     @DisplayName("Header Test")
     fun engTestThree()
     {
-        val colList = listOf("COL1", "COLB", "COL3")
+        val colList = listOf("COL1", "colb", "COL3")
         val verbList : List<OpCode> = listOf(OpTypeDef("T1", colList),
                 OpTypeRef("T1"),
                 OpHeader())
@@ -108,7 +108,7 @@ class EngineTest {
         val subj = Engine(verbList)
         subj.eval(myWriter)
 
-        assertEquals("COL1|COLB|COL3", myWriter.toString() )
+        assertEquals("COL1|colb|COL3", myWriter.toString() )
     }
 
 
@@ -126,5 +126,7 @@ class EngineTest {
         assertFailsWith<IllegalStateException> {subj.eval()}
 
     }
+
+
 
 }

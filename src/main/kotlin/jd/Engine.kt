@@ -37,7 +37,7 @@ class Engine(val verbs : List<OpCode>) {
                     }
 
                 is OpRecord -> rec = Record(currentType.fields.toTypedArray())
-//                is OpWrite -> println(rec.toString())
+                is OpWrite -> println(rec.toString())
                 is OpSet -> rec.set(v.name, v.x)
 
             }
