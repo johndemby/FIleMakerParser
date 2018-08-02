@@ -108,7 +108,7 @@ class EngineTest {
         val subj = Engine(verbList)
         subj.eval(myWriter)
 
-        assertEquals("COL1|colb|COL3", myWriter.toString() )
+        assertEquals("COL1|COLB|COL3", myWriter.toString() )
     }
 
 
@@ -126,7 +126,5 @@ class EngineTest {
         assertFailsWith<IllegalStateException> {subj.eval()}
 
     }
-
-
 
 }
