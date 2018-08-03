@@ -10,14 +10,35 @@ import kotlin.test.assertFailsWith
 
 class EngineTest {
 
+
     @Test
-    @DisplayName("Engine Basic Construction")
+//@DisplayName("Header without type ref ")
+    @Ignore
+    fun newTestGood()
+    {
+        val colList = listOf("col1", "colb", "colIII")
+        val verbList: List<OpCode> = listOf(OpTypeDef("T1", colList),
+                OpTypeRef("T1"),
+                OpHeader())
+
+        val res : StringList =  Engine.generate(verbList)
+        assertEquals(1, res.size, "should be header only")
+        assertEquals("col1|colb|colIII", res[0])
+
+    }
+
+
+    @Test
+    @DisplayName("Engine evaluate nothing")
     fun testCtor()
     {
-        val subj = Engine(emptyList())
-        val symbTab: SymbolTable = subj.getSymbolTable()
+        val symbTab: SymbolTable = Engine.evaluate(listOf()).symbolTable
         assertEquals(0, symbTab.size)
     }
+
+
+
+
 
     @Test
     @DisplayName("TypeDef Engine test")
@@ -25,13 +46,15 @@ class EngineTest {
 
         val colList = listOf("col1", "col2", "col3")
         val verbList = listOf(OpTypeDef("testType", colList ))
-        val subj = Engine(verbList)
-        subj.eval()
-        val symbTab :SymbolTable = subj.getSymbolTable()
+        val subj = Engine
+
+        val symbTab :SymbolTable = Engine.evaluate(verbList).symbolTable
 
         assertEquals( 1, symbTab.size,"Should be one element")
         assertEquals(Type(colList),  symbTab.getTypeDef("testType"))
     }
+
+
 
     @Test
     @DisplayName("Engine Invalid Type Ref Test")
@@ -40,9 +63,7 @@ class EngineTest {
         val colList = listOf("col1", "colb", "colIII")
         val verbList : List<OpCode> = listOf(OpTypeDef("T1", colList),
                 OpTypeRef("T2"))
-        val subj = Engine(verbList)
-
-        assertFailsWith<IllegalStateException>("Type T2, not  defined") {subj.eval() }
+        assertFailsWith<IllegalStateException>("Type T2, not  defined") {Engine.evaluate(verbList) }
     }
 
 
@@ -53,9 +74,8 @@ class EngineTest {
         val colList = listOf("col1", "colb", "colc")
         val verbList : List<OpCode> = listOf(OpTypeDef("t1", colList),
                                              OpTypeDef("T2", listOf("foo", "bar", "BAZ")))
-        val subj = Engine(verbList)
-        subj.eval()
-        val symbTab :SymbolTable = subj.getSymbolTable()
+        val subj = Engine
+        val symbTab :SymbolTable = subj.evaluate((verbList)).symbolTable
 
         assertEquals( 2, symbTab.size,"Should be two elements")
         assertEquals(Type(colList),  symbTab.getTypeDef("T1"))
@@ -70,14 +90,10 @@ class EngineTest {
         val verbList : List<OpCode> = listOf(OpTypeDef("T1", listOf("name", "addr", "phone")),
                 OpTypeDef("T2",  colList),
                 OpTypeRef("T2"))
-        val subj = Engine(verbList)
-        val symbTab :SymbolTable = subj.getSymbolTable()
 
-        subj.eval()
-
+        val symbTab :SymbolTable = Engine.evaluate(verbList).symbolTable
         assertEquals( 2, symbTab.size,"Should be two elements")
         assertEquals(Type(colList),  symbTab.getTypeDef("T2"))
-
     }
 
 
@@ -88,9 +104,7 @@ class EngineTest {
         val colList = listOf("col1", "colb", "colIII")
         val verbList : List<OpCode> = listOf(OpTypeDef("T1", colList),
                 OpTypeRef("t1"))
-        val subj = Engine(verbList)
-        subj.eval()
-        val symbTab :SymbolTable = subj.getSymbolTable()
+        val symbTab :SymbolTable = Engine.evaluate(verbList).symbolTable
 
         assertEquals( 1, symbTab.size,"Should be one element")
         assertEquals(Type(colList),  symbTab.getTypeDef("t1"))
@@ -104,11 +118,10 @@ class EngineTest {
         val verbList : List<OpCode> = listOf(OpTypeDef("T1", colList),
                 OpTypeRef("T1"),
                 OpHeader())
-        var myWriter = StringWriter()
-        val subj = Engine(verbList)
-        subj.eval(myWriter)
+        val actual = Engine.generate(verbList)
 
-        assertEquals("COL1|COLB|COL3", myWriter.toString() )
+        assertEquals(1, actual.size)
+        assertEquals("COL1|colb|COL3", actual[0] )
     }
 
 
@@ -120,10 +133,7 @@ class EngineTest {
         val colList = listOf("col1", "colb", "colIII")
         val verbList : List<OpCode> = listOf(OpTypeDef("T1", colList),
                                              OpHeader())
-        val subj = Engine(verbList)
-        val symbTab :SymbolTable = subj.getSymbolTable()
-
-        assertFailsWith<IllegalStateException> {subj.eval()}
+        assertFailsWith<IllegalStateException> {Engine.generate(verbList)}
 
     }
 
