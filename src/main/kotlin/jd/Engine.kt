@@ -61,13 +61,18 @@ object Engine
     }
 
 
-
     private fun OpCopy.eval(state: State): State
     {
         return state.also { System.err.println("Copy not impemented") }
     }
 
 
+    /**
+     *  Process the list of opcodes and produce State instance.
+     *
+     *  @param verbs  parsed instructions
+     *  @return an instance of [State] resulting from evaluating the opcodes.
+     */
     fun evaluate(verbs: List<OpCode>) : State
     {
         val rec = Record(NOTYPE.fields.toTypedArray())
@@ -92,6 +97,12 @@ object Engine
         return verbs.fold(state) { s, op -> eval(s, op) }
     }
 
+    /**
+     * Generate a string list based on the supplied list of opcodes.
+     *
+     * @param verbs  parsed instructions
+     * @return List of Strings each element represents a line of text.
+     */
     fun generate(verbs: List<OpCode>): StringList  = evaluate(verbs).result
 
 }

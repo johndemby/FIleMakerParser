@@ -6,10 +6,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Assertions.assertThrows
 import java.io.StringReader
 
-
 class ParserTest
 {
-
     @Test
     @DisplayName("Type (UC) definition test")
     fun testTypeDefUC()
@@ -88,8 +86,6 @@ class ParserTest
         assertEquals(expected, opcodes)
     }
 
-
-
     @Test
     fun testWrite()
     {
@@ -100,7 +96,6 @@ class ParserTest
         assertEquals(expected, opcodes)
     }
 
-
     @Test
     fun testHeader()
     {
@@ -110,7 +105,6 @@ class ParserTest
         val opcodes = parser.parseIt(StringReader(dataStr))
         assertEquals(expected, opcodes)
     }
-
 
     @Test
     @DisplayName("valid type reference")

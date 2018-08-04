@@ -41,6 +41,8 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     compile "org.jetbrains.kotlin:kotlin-reflect"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile 'org.slf4j:slf4j-api:1.7.18'
+    runtime "ch.qos.logback:logback-classic:1.0.13"
 }
 
 compileKotlin {

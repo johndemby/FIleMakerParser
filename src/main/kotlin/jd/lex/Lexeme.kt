@@ -42,7 +42,7 @@ data class LexEOT( val lineNum : Int) : Lexeme(lineNum)
 
 data class LexChar(val lexVal : Int, val lineNum : Int) : Lexeme(lineNum)
 {
-    private val ch : Char  = (lexVal as Int).toChar()
+    private val ch  = (lexVal as Int).toChar()
 
     override fun stringVal() = "$ch"
     override fun intVal()  = lexVal

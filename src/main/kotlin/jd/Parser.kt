@@ -7,6 +7,8 @@ import java.io.Reader
 import java.util.*
 import jd.lex.Lexer
 import jd.lex.Lexeme
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 
 class BadDataException (msg : String) : Exception(msg)
@@ -52,6 +54,7 @@ write
 class Parser
 {
 
+    private val logger : Logger = LoggerFactory.getLogger("jd.Parser")
 
     fun parseIt(rdr : Reader) : List<OpCode>
     {
@@ -61,8 +64,11 @@ class Parser
         var lexeme : Lexeme = lexer.next()
         val initKeywords = "DEFINE, TYPE, WRITE, HEADER, COPY"
 
+        logger.debug("first lexeme is $lexeme")
+
         while (lexeme !is LexEOT)
         {
+            logger.debug ("found lexeme $lexeme")
             when (lexeme)
             {
                 is LexName ->
