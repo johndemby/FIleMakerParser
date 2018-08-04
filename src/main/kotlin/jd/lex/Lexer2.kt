@@ -6,6 +6,7 @@ import java.io.StringReader
 
 class Lexer
 {
+
     constructor (rdr : Reader)
     {
         toker = makeLexer(rdr)
@@ -67,4 +68,6 @@ class Lexer
     val tokSingleQuote : Int = 39
     val tokOpenParen   : Int = 40
     val tokCloseParen  : Int = 41
+
+
 }
