@@ -48,6 +48,8 @@ class Lexer
         return retValue
     }
 
+    fun pushBack() = toker.pushBack()
+
 
     fun makeLexer(rdr : Reader) : StreamTokenizer
     {

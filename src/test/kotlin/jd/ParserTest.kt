@@ -17,7 +17,7 @@ class ParserTest
         val  parser = Parser()
 
         val actual : List<OpCode> = parser.parseIt(StringReader(dataStr))
-        val expected = listOf(OpTypeDef("mytype", listOf("fldA", "fldB")))
+        val expected = listOf(OpTypeDef(1,"mytype", listOf("fldA", "fldB")))
 
         assertEquals(expected, actual)
     }
@@ -31,7 +31,7 @@ class ParserTest
         val  parser = Parser()
 
         val actual : List<OpCode> = parser.parseIt(StringReader(dataStr))
-        val expected = listOf(OpTypeDef("mytype", listOf("fldA", "fldB")))
+        val expected = listOf(OpTypeDef(1, "mytype", listOf("fldA", "fldB")))
 
         assertEquals(expected, actual)
     }
@@ -80,7 +80,7 @@ class ParserTest
     fun testGoodTypeDef()
     {
         val dataStr = "define TYPE goodType (col1 col2 col3)"
-        val expected : List<OpCode> = listOf(OpTypeDef("goodType", listOf("col1", "col2", "col3")))
+        val expected : List<OpCode> = listOf(OpTypeDef(1, "goodType", listOf("col1", "col2", "col3")))
         val parser = Parser()
         val opcodes = parser.parseIt(StringReader(dataStr))
         assertEquals(expected, opcodes)
@@ -90,7 +90,7 @@ class ParserTest
     fun testWrite()
     {
         val dataStr = "write  "
-        val expected : List<OpCode> = listOf(OpWrite())
+        val expected : List<OpCode> = listOf(OpWrite(1))
         val parser = Parser()
         val opcodes = parser.parseIt(StringReader(dataStr))
         assertEquals(expected, opcodes)
@@ -100,7 +100,7 @@ class ParserTest
     fun testHeader()
     {
         val dataStr = "heaDer  "
-        val expected : List<OpCode> = listOf(OpHeader())
+        val expected : List<OpCode> = listOf(OpHeader(1))
         val parser = Parser()
         val opcodes = parser.parseIt(StringReader(dataStr))
         assertEquals(expected, opcodes)
@@ -111,7 +111,7 @@ class ParserTest
     fun testTypeRef()
     {
         val dataStr = "type sometype "
-        val expected: List<OpCode> = listOf(OpTypeRef("sometype"))
+        val expected: List<OpCode> = listOf(OpTypeRef(1,"sometype"))
         val parser = Parser()
         val opcodes = parser.parseIt(StringReader(dataStr))
         assertEquals(expected, opcodes)
@@ -146,4 +146,37 @@ class ParserTest
         assert(true)
 
     }
+
+
+    @Test
+    @DisplayName("Empty Record test")
+    fun recTest1()
+    {
+        val dataStr = "RECORD ()"
+
+        val parser = Parser()
+        val opCodes = parser.parseIt(StringReader(dataStr))
+        assertEquals(1, opCodes.size, "Should only be one op code")
+        assertEquals(listOf(OpRecord(1)), opCodes)
+    }
+
+
+    @Test
+    @DisplayName("Record test")
+    fun recTest2()
+    {
+        val dataStr = """RECORD (col1 'A' col2 12 col3 "123") """
+
+        val parser = Parser()
+        val opCodes = parser.parseIt(StringReader(dataStr))
+        val expected  : List<OpCode> = listOf(OpRecord(1)
+                , OpSet(1, "col1", "A")
+                , OpSet(1, "col2", "12")
+                , OpSet(1, "col3", "123"))
+
+        assertEquals(expected, opCodes)
+
+
+    }
+
 }

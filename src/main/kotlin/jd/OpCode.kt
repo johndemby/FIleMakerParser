@@ -3,48 +3,38 @@ package jd
 typealias StringList = List<String>
 //typealias MutableStringList = MutableList<String>
 
-sealed class OpCode
+typealias PairOfStrings = Pair<String, String>
+
+sealed class OpCode ( val lineNo : Int)
 {
 
 }
 
-data class OpTypeDef (val name : String , val fields : StringList) : OpCode()
+data class OpTypeDef ( private val line : Int, val name : String , val fields : StringList) : OpCode(line)
 {
-
 }
 
-
-
-
-data class OpTypeRef(val name : String) : OpCode()
+data class OpTypeRef( private val line : Int, val name : String) : OpCode(line)
 {
-
 }
 
-data class OpRecord (val name : String , val fields : StringList)  : OpCode()
+data class OpRecord (private val line : Int)  : OpCode(line)
 {
-
 }
 
-data class OpWrite(val foo : Byte = 0) : OpCode()
+data class OpWrite(private val line : Int) : OpCode(line)
 {
-
 }
 
-data class OpHeader(val foo : Byte = 0) : OpCode()
+data class OpHeader(private val line : Int) : OpCode(line)
 {
-
 }
 
-
-data class OpCopy(val name : String) : OpCode()
+data class OpCopy( private val line : Int, val name : String) : OpCode(line)
 {
-
 }
 
-
-
-data class OpSet(val name :String , val x : String) : OpCode()
+data class OpSet(private val line : Int, val name :String , val x : String) : OpCode(line)
 {
 }
 

@@ -1,12 +1,8 @@
 package jd
 
-import jd.lex.LexEOT
-import jd.lex.LexName
-import java.io.LineNumberReader
+import jd.lex.*
 import java.io.Reader
 import java.util.*
-import jd.lex.Lexer
-import jd.lex.Lexeme
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -28,11 +24,12 @@ header
 
 write
 
-record (col1 7, col2 "B", col3 "M")
+record (col1 7 col2 "B" col3 "M")
 
 write
 
-record (col1 8, col2 A, col3 "M")
+record (col1 8 col2 A col3 "M")
+
 
 write
 
@@ -60,7 +57,7 @@ class Parser
     {
 
         val retval : MutableList<OpCode> = LinkedList()
-        val lexer : Lexer = Lexer(rdr)
+        val lexer  = Lexer(rdr)
         var lexeme : Lexeme = lexer.next()
         val initKeywords = "DEFINE, TYPE, WRITE, HEADER, COPY"
 
@@ -78,10 +75,10 @@ class Parser
                             {
                                 "DEFINE" -> listOf(processDefine(lexer))
                                 "TYPE"   -> listOf(processTypeRef(lexer))
-                                "WRITE"  -> listOf(OpWrite())
-                                "HEADER" -> listOf(OpHeader())
+                                "WRITE"  -> listOf(OpWrite(lexeme.lineNum))
+                                "HEADER" -> listOf(OpHeader(lexeme.lineNum))
                                 "COPY"   -> listOf(processCopy(lexer))
-                                //"RECORD" -> OpRecord()
+                                "RECORD" -> processRecord(lexer, lexeme.lineNum)
 
                                 else -> error(lexeme.lineNum, "*** ERROR expected one of $initKeywords but got ${lexeme.stringVal()}")
                             }
@@ -101,18 +98,18 @@ class Parser
     }
 
 
-    fun processCopy(lexer : Lexer) : OpCode
+    private fun processCopy(lexer : Lexer) : OpCode
     {
         val lex = lexer.next()
 
         if (lex  !is jd.lex.LexName)
             BadDataException(" COPY - expected name got $lex ")
 
-        return OpCopy(lex.stringVal())
+        return OpCopy( lex.lineNo,  lex.stringVal())
     }
 
 
-    fun processDefine(lexer : Lexer) : OpCode
+    private fun processDefine(lexer : Lexer) : OpCode
     {
         val lex = lexer.next()
 
@@ -127,7 +124,7 @@ class Parser
 
     private fun processTypeDef(lexer : Lexer) : OpCode
     {
-        var l1 : Lexeme = lexer.next()
+        val l1 : Lexeme = lexer.next()
 
         if (l1 !is LexName)
         {
@@ -136,17 +133,18 @@ class Parser
 
         val typeName = l1.stringVal()
         val fieldList : List<String>
+        val lineNo = l1.lineNum
 
-        l1 = lexer.next()
-        if (l1.stringVal() == "(")
+        val l2 = lexer.next()
+        if (l2.stringVal() == "(")
         {
             fieldList = processFieldList(lexer)
-            return OpTypeDef(typeName, fieldList)
+            return OpTypeDef(lineNo, typeName, fieldList)
             //println ("TYPEDEF \"$typeName\"  fields $fieldList")
         }
         else
         {
-            error(l1.lineNo, "TypeDef expected Char '(', got $l1")
+            error(l2.lineNo, "TypeDef expected Char '(', got $l2")
         }
 
     }
@@ -177,15 +175,50 @@ class Parser
     }
 
 
-    fun processTypeRef(lexer : Lexer) : OpCode
+   private fun processTypeRef(lexer : Lexer) : OpCode
     {
         val token = lexer.next()
         if  (token !is LexName)
-            error(token.lineNo, "Expecting a NAME , but got ${token}")
+            error(token.lineNo, "Expecting a NAME , but got $token")
         else
-            return OpTypeRef(token.stringVal())
+            return OpTypeRef(token.lineNum, token.stringVal())
 
     }
+
+
+    private fun processRecord(lexer : Lexer, lineNum : Int) : List<OpCode>
+    {
+        val token = lexer.next()
+        return if (token.stringVal() == "(")
+            listOf(OpRecord(lineNum)) + processNameValuePairs(lexer, listOf())
+        else
+            error(token.lineNo, "Expecting \"(\", but got $token")
+    }
+
+    private tailrec fun processNameValuePairs(lexer: Lexer, prevCodes : List<OpCode>): List<OpCode>
+    {
+        val token1 = lexer.next()
+
+        if (token1 is LexChar && token1.stringVal() == ")") return prevCodes
+        if (token1 !is LexName) error(token1.lineNo, "Fieldlist, expected a NAME or \")\", but got $token1")
+
+        val fldName = token1.stringVal()
+        val fldValueToken = lexer.next()
+
+        return when (fldValueToken)
+        {
+            is LexQString,
+            is LexNum ->
+            {
+                val fldValue = fldValueToken.stringVal()
+                val codeList = prevCodes + OpSet(token1.lineNo, fldName, fldValue)
+                processNameValuePairs(lexer, codeList)
+            }
+            else ->
+                error(fldValueToken.lineNo, "Expected a Number or Quoted String but got $fldValueToken")
+        }
+
+    }  // processNameValuePairs
 
 
 }

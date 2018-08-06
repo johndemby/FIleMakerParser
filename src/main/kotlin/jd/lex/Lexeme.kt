@@ -15,7 +15,7 @@ data class LexName (val lexVal : String , val lineNum : Int) : Lexeme(lineNum)
 
 data class LexNum(val lexVal : Int,  val lineNum : Int) : Lexeme(lineNum)
 {
-    override fun stringVal()  = ""
+    override fun stringVal()  = lexVal.toString()
     override fun intVal()  = lexVal
 }
 
